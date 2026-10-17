@@ -4,6 +4,7 @@ import {
   type ExtensionContext,
   getAgentDir,
 } from "@earendil-works/pi-coding-agent";
+import type { TUI } from "@earendil-works/pi-tui";
 import { installPromptHistoryEditor } from "../src/editor.ts";
 import {
   collectHistory,
@@ -107,7 +108,9 @@ export default function promptHistoryExtension(
         maxSessionFiles: options.maxSessionFiles,
       });
 
+      let activeTui: TUI | undefined;
       const selected = await ctx.ui.custom<string | null>((tui, theme, _kb, done) => {
+        activeTui = tui;
         return new PromptHistorySelectorComponent(tui, theme, items, {
           initialQuery,
           initialScope: options.defaultScope,
@@ -118,6 +121,7 @@ export default function promptHistoryExtension(
 
       if (typeof selected === "string") {
         ctx.ui.setEditorText(selected);
+        activeTui?.requestRender();
       }
     } finally {
       isSearchOpen = false;

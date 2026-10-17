@@ -22,6 +22,7 @@ function createHarness() {
     },
   } as any;
 
+  const tui = { requestRender: vi.fn() };
   const ui = {
     getEditorText: () => editorText,
     setEditorText: vi.fn((text: string) => {
@@ -36,7 +37,7 @@ function createHarness() {
       lastCustomFactory = factory;
       return await new Promise<string | null>((resolve) => {
         const comp = factory(
-          { requestRender: vi.fn() },
+          tui,
           {
             fg: (_c: string, t: string) => t,
             bg: (_c: string, t: string) => t,
@@ -75,6 +76,7 @@ function createHarness() {
     pi,
     ctx,
     ui,
+    tui,
     handlers,
     commands,
     setEditorTextState: (t: string) => {
@@ -128,6 +130,7 @@ describe("promptHistoryExtension", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(h.ui.setEditorText).toHaveBeenCalledWith("second prompt from input event");
+    expect(h.tui.requestRender).toHaveBeenCalled();
   });
 
   it("supports /history slash command with optional query argument and leaves editor unchanged on Escape", async () => {
